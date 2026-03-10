@@ -1,0 +1,33 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base"
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["cgr.dev/chainguard/wolfi-base"],
+      "automerge": true
+    }
+  ],
+  "dockerfile": {
+    "fileMatch": ["images/.*/Dockerfile"]
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^ci/main\\.go$"],
+      "matchStrings": [
+        "\"go\":\\s+\\{.*\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\".*\\}",
+        "\"node\":\\s+\\{.*\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\".*\\}"
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "cgr.dev/chainguard/wolfi-base",
+      "versioningTemplate": "semver"
+    }
+  ]
+}
