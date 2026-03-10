@@ -22,12 +22,39 @@
       "customType": "regex",
       "fileMatch": ["^ci/main\\.go$"],
       "matchStrings": [
-        "\"go\":\\s+\\{.*\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\".*\\}",
-        "\"node\":\\s+\\{.*\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\".*\\}"
+        "\"go\":\\s*\\{[^}]*\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\"[^}]*\\}"
       ],
       "datasourceTemplate": "docker",
-      "depNameTemplate": "cgr.dev/chainguard/wolfi-base",
+      "depNameTemplate": "golang",
       "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^ci/main\\.go$"],
+      "matchStrings": [
+        "\"node\":\\s*\\{[^}]*\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\"[^}]*\\}"
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "node",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^images/go/Dockerfile$"],
+      "matchStrings": [
+        "ARG GO_VERSION=(?<currentValue>.*)"
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "golang"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^images/node/Dockerfile$"],
+      "matchStrings": [
+        "ARG NODE_VERSION=(?<currentValue>.*)"
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "node"
     }
   ]
 }

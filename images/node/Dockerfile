@@ -7,10 +7,9 @@ FROM cgr.dev/chainguard/wolfi-base
 USER root
 
 # Install core dependencies (The 80%) via APK (Wolfi)
-# Note: Wolfi 'nodejs' tracks latest/LTS. If you need 24.12 specifically, we might need 'nodejs-24' (if available) or rely on latest.
-# Chainguard provides specific streams. For "dev", 'nodejs' is usually sufficient.
+ARG NODE_VERSION=24
 RUN apk update && apk add --no-cache \
-    nodejs \
+    nodejs-${NODE_VERSION} \
     npm \
     git \
     build-base \
