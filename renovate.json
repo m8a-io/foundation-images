@@ -1,0 +1,60 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base"
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["cgr.dev/chainguard/wolfi-base"],
+      "automerge": true
+    }
+  ],
+  "dockerfile": {
+    "fileMatch": ["images/.*/Dockerfile"]
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^ci/main\\.go$"],
+      "matchStrings": [
+        "\"go\":\\s*\\{[^}]*\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\"[^}]*\\}"
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "golang",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^ci/main\\.go$"],
+      "matchStrings": [
+        "\"node\":\\s*\\{[^}]*\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\"[^}]*\\}"
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "node",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^images/go/Dockerfile$"],
+      "matchStrings": [
+        "ARG GO_VERSION=(?<currentValue>.*)"
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "golang"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^images/node/Dockerfile$"],
+      "matchStrings": [
+        "ARG NODE_VERSION=(?<currentValue>.*)"
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "node"
+    }
+  ]
+}
