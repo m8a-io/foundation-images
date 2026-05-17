@@ -1,49 +1,50 @@
-# m8aio/go-dev
-# Base image for Go development environments
-# Wolfi Base
-FROM cgr.dev/chainguard/wolfi-base
+# Foundational image for Go services in the m8a platform.
+#
+# Targets (built via --target):
+#   prod       Minimal runtime. Final FROM target for shipped service images.
+#              Contains ca-certificates, tzdata, glibc. No Mise, no compilers.
+#   dev-build  Extends prod with Mise + CGO build toolchain. Used by CI and
+#              by Dockerfile builder stages in app repos.
+#
+# The Go runtime is NOT installed here. It is resolved at build time by Mise
+# from the consuming repo's mise.toml. See ADR-INF-007.
 
-# Run everything as root initially for setup
+# ---------------------------------------------------------------------------
+# prod: minimal runtime layer
+# ---------------------------------------------------------------------------
+FROM cgr.dev/chainguard/wolfi-base AS prod
+
+RUN apk add --no-cache \
+    ca-certificates \
+    tzdata
+
+WORKDIR /app
+
+# ---------------------------------------------------------------------------
+# dev-build: extends prod with Mise + CGO toolchain
+# ---------------------------------------------------------------------------
+FROM prod AS dev-build
+
+# Renovate-managed pin. Bump when Mise releases a new stable version.
+ARG MISE_VERSION=2026.5.10
+
 USER root
 
-# Install core dependencies (The 80%) via APK (Wolfi)
-ARG GO_VERSION=1.26
-RUN apk update && apk add --no-cache \
-    go-${GO_VERSION} \
-    git \
-    build-base \
-    openssh-client \
-    curl \
+RUN apk add --no-cache \
     bash \
-    zsh \
-    vim \
-    jq \
-    sudo \
-    procps \
-    wget \
-    net-tools \
-    shadow \
-    unzip \
-    gzip
+    build-base \
+    curl \
+    git \
+    make
 
-# Create 'dev' user
-# Wolfi uses standard useradd if 'shadow' package is installed or adduser
-# We use UID 1001 to match previous
-RUN useradd dev \
-    --create-home \
-    --shell=/bin/zsh \
-    --groups=root \
-    --uid=1001 \
-    --user-group && \
-    mkdir -p /etc/sudoers.d && \
-    echo "dev ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers.d/nopasswd
+# MISE_DATA_DIR is decoupled from $HOME so the tool install cache is mountable
+# as a Dagger cache volume at a stable, user-agnostic path.
+ENV MISE_DATA_DIR=/opt/mise \
+    MISE_INSTALL_PATH=/usr/local/bin/mise \
+    PATH=/opt/mise/shims:/usr/local/bin:/usr/bin:/bin
 
-# Setup GOPATH
-ENV GOPATH=/go
-ENV PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
-RUN mkdir -p /go && chown -R dev:dev /go
+RUN curl -fsSL https://mise.run | MISE_VERSION="v${MISE_VERSION}" sh \
+    && mkdir -p "${MISE_DATA_DIR}" \
+    && mise --version
 
-# Set back to dev user
-USER dev
-
-WORKDIR /home/dev
+WORKDIR /app

@@ -20,41 +20,13 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^ci/main\\.go$"],
+      "fileMatch": ["^images/.*/Dockerfile$"],
       "matchStrings": [
-        "\"go\":\\s*\\{[^}]*\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\"[^}]*\\}"
+        "ARG MISE_VERSION=(?<currentValue>\\S+)"
       ],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "golang",
-      "versioningTemplate": "semver"
-    },
-    {
-      "customType": "regex",
-      "fileMatch": ["^ci/main\\.go$"],
-      "matchStrings": [
-        "\"node\":\\s*\\{[^}]*\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\"[^}]*\\}"
-      ],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "node",
-      "versioningTemplate": "semver"
-    },
-    {
-      "customType": "regex",
-      "fileMatch": ["^images/go/Dockerfile$"],
-      "matchStrings": [
-        "ARG GO_VERSION=(?<currentValue>.*)"
-      ],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "golang"
-    },
-    {
-      "customType": "regex",
-      "fileMatch": ["^images/node/Dockerfile$"],
-      "matchStrings": [
-        "ARG NODE_VERSION=(?<currentValue>.*)"
-      ],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "node"
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "jdx/mise",
+      "extractVersionTemplate": "^v(?<version>.+)$"
     }
   ]
 }
