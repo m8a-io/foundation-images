@@ -23,9 +23,9 @@ To ensure our collaboration is both efficient and educational, we will use the f
     *   **Action:** Once the plan is understood (or if the task is trivial), proceed with execution.
 *   **Constructive Pushback:** Do not blindly follow instructions if they seem wrong or sub-optimal. Act as a true partner: challenge my assumptions, point out anti-patterns, and suggest better alternatives.
 
-## 🧠 Continuous Improvement & Knowledge Sharing
+## Continuous Improvement & Knowledge Sharing
 
-You are working in a team environment. Your private memory is ephemeral and local to this specific workspace, but **this file (`GEMINI.md`) is our persistent, shared source of truth.**
+You are working in a team environment. Your private memory is ephemeral and local to this specific workspace, but **this file (`CLAUDE.md`) is our persistent, shared source of truth.**
 
 ## Your Additional Mandate
 You must actively help maintain and evolve this documentation. Do not let useful knowledge die in your private context window.
@@ -38,8 +38,8 @@ Trigger a "Knowledge Promotion" event if you successfully complete a task that i
 
 ### How to Promote Knowledge
 When a Trigger event occurs:
-1.  **Draft the Update:** Immediately propose a text update for `GEMINI.md` (or a relevant file in `docs/`). Use the existing formatting style.
-2.  **Solicit Confirmation:** explicitly ask the user: *"I found a reproducible pattern here. Should I add this to GEMINI.md or other docs, so the rest of the team's agents know how to handle this?"*
+1.  **Draft the Update:** Immediately propose a text update for `CLAUDE.md` (or a relevant file in `docs/`). Use the existing formatting style.
+2.  **Solicit Confirmation:** explicitly ask the user: *"I found a reproducible pattern here. Should I add this to CLAUDE.md or other docs, so the rest of the team's agents know how to handle this?"*
 
 ## Safety and Precaution
 
@@ -210,3 +210,17 @@ When running inside the `m8a-go` RDE:
 *   **Image Issues:** The official `dagger/dagger` image from Docker Hub may fail to pull in some RDEs due to "insufficient_scope" or rate limits.
     *   **Workaround:** Use `alpine:latest` and install Dagger dynamically: `curl -L https://dl.dagger.io/dagger/install.sh | sh`.
 
+### Wolfi/Chainguard APK Package Quirks
+*   **`npm` is NOT bundled with `nodejs-N`:** Unlike the upstream Node.js tarball or Alpine's `nodejs` package, Wolfi splits npm out as a separate `npm` package. Always list both explicitly.
+*   **`g++` does not exist as a standalone package:** Wolfi has no `g++` apk entry. It is provided as part of `build-base`. Do not list `g++` separately — it will fail with "no such package".
+*   **`github-cli` does not exist in the Wolfi registry:** There is no `github-cli` or `gh` apk package in Wolfi/Chainguard. Install the gh CLI by downloading the binary directly from GitHub releases:
+    ```dockerfile
+    ARG GH_VERSION=2.74.0
+    RUN ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/') && \
+        curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_${ARCH}.tar.gz" \
+          -o /tmp/gh.tar.gz && \
+        tar -xzf /tmp/gh.tar.gz -C /tmp && \
+        mv /tmp/gh_${GH_VERSION}_linux_${ARCH}/bin/gh /usr/local/bin/gh && \
+        rm -rf /tmp/gh.tar.gz /tmp/gh_${GH_VERSION}_linux_${ARCH}
+    ```
+*   **pnpm and Rush:** Rush manages its own pinned pnpm version via `pnpmVersion` in `rush.json` and installs it at `~/.rush/`. However, install pnpm globally in the image anyway so it is available outside Rush contexts (scripts, `pnpm dlx`, debugging). Pin to the required range: `npm install -g pnpm@<version>`.

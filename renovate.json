@@ -12,6 +12,10 @@
       "matchDatasources": ["docker"],
       "matchPackageNames": ["cgr.dev/chainguard/wolfi-base"],
       "automerge": true
+    },
+    {
+      "matchPackageNames": ["pnpm"],
+      "allowedVersions": ">=10.34.1 <11"
     }
   ],
   "dockerfile": {
@@ -55,6 +59,24 @@
       ],
       "datasourceTemplate": "docker",
       "depNameTemplate": "node"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^images/node/Dockerfile$"],
+      "matchStrings": [
+        "ARG PNPM_VERSION=(?<currentValue>[^\\s]+)"
+      ],
+      "datasourceTemplate": "npm",
+      "depNameTemplate": "pnpm"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["images/.*/Dockerfile"],
+      "matchStrings": [
+        "ARG GH_VERSION=(?<currentValue>[^\\s]+)"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "cli/cli"
     }
   ]
 }
